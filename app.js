@@ -290,10 +290,13 @@ function openFileAndParse(filename,callback){
 	var file = 'data/'+filename;
 	fs.readFile(file, 'utf8', function(err,data){
 			//console.log(data);
-			parse(data, {comment: '#'}, function(err,output){
-				//console.log(output[0]);
+			// parse(data, {comment: '#'}, function(err,output){
+			// 	//console.log(output[0]);
+			// 	callback(output);
+			// });
+			csvtoArrayConverter(data,function(output){
 				callback(output);
-			});
+			})
 		})
 }
 
@@ -540,7 +543,7 @@ function heatingAvg(){
 	return defrostBin;
 }
 
-//Return average for just the heating periods
+//Return average for just the heating periods for specific variable (item)
 function heatingAvgTotal(input){
 	avgData = heatingAvg();
 	output=0;
@@ -549,6 +552,27 @@ function heatingAvgTotal(input){
 	}
 	output =output/avgData.length;
 	return round(output);
+}
+
+//Converts data file (.csv) into a data array
+function csvtoArrayConverter(data,callback){
+	//split file at \r\n characters
+	modFile = data.split('\r\n');
+	//remove first 5 rows (strings)
+	modFileSplit = modFile.slice(5,modFile.length);
+	//split each row (string) into array at , character
+	modFile2=[];
+	for(var i =0; i<modFileSplit.length; i++){		
+		modFile2.push(modFileSplit[i].split(','));
+		//console.log(modFile2[i]);
+	}
+	//remove any arrays that do not contain the same number of items as the first row
+	for(var i=0; i<modFile2.length;i++){
+		if(modFile2[i].length < modFile2[0].length){
+			modFile2.splice(i,1);
+		}
+	}
+	callback(modFile2);
 }
 
 // function avgMultipleSection(data){
